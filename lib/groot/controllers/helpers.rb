@@ -3,7 +3,7 @@ require 'jwt'
 module Groot
   module Controllers
     module Helpers
-      def self.define_method(mapping)
+      def self.define_helpers(mapping)
         name = mapping.name
         class_eval <<-METHODS, __FILE__, __LINE__ + 1
           def authenticate_#{name}!
@@ -46,11 +46,11 @@ module Groot
           }
           JWT.decode(token, Groot.hmac_secret, true, options).first
         rescue JWT::ExpiredSignature
-          render json: { message: 'The token has expired.' }, status: :forbidden
+          render json: { message: 'The token has expired.' }, status: :unauthorized
         rescue JWT::VerificationError
-          render json: { message: 'Invalid access token.' }, status: :forbidden
+          render json: { message: 'Invalid access token.' }, status: :unauthorized
         rescue JWT::DecodeError
-          render json: { message: 'Invalid access token.' }, status: :forbidden
+          render json: { message: 'Invalid access token.' }, status: :unauthorized
         end
       end
     end

@@ -3,9 +3,10 @@ module Groot
   class Engine < ::Rails::Engine
     isolate_namespace Groot
 
-    initializer "groot.add_helpers" do
+    initializer "groot.add_controllers_helpers" do
       ActiveSupport.on_load(:action_controller) do
         include Controllers::Helpers
+        include Controllers::Policy
       end
     end
   end
