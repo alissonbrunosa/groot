@@ -10,12 +10,14 @@ module Groot
             decode(http_token)
           end
           def #{name}_signed_in?
-            !!current_user
+            !!current_#{name}
           end
           def current_#{name}
             payload = decode(http_token)
-            @current_user ||= #{mapping.clazz}.find(payload["id"])
+            @current_#{name} ||= #{mapping.clazz}.find(payload["sub"])
           end
+
+          alias_method :current_resource, :current_#{name}
         METHODS
 
         ActiveSupport.on_load(:action_controller) do
@@ -28,23 +30,21 @@ module Groot
       private
 
       def http_token
-        @http_token ||= request.headers['Authorization'].split(' ').last if request.headers['Authorization'].present?
-      end 
+        token, options = ActionController::HttpAuthentication::Token.token_and_options(request)
+        token
+      end
 
       def encode(resource)
         payload = {
-          id: resource.id,
+          sub: resource.id,
           exp: (Time.now + 24.hours).to_i
         }
-        JWT.encode(payload, Groot.hmac_secret, 'HS256')
+        JWT.encode(payload, hmac_secret, algorithm)
       end
 
       def decode(token)
         begin
-          options = { 
-            algorithm: 'HS256'
-          }
-          JWT.decode(token, Groot.hmac_secret, true, options).first
+          JWT.decode(token, hmac_secret, true, options).first
         rescue JWT::ExpiredSignature
           render json: { message: 'The token has expired.' }, status: :unauthorized
         rescue JWT::VerificationError
@@ -52,6 +52,20 @@ module Groot
         rescue JWT::DecodeError
           render json: { message: 'Invalid access token.' }, status: :unauthorized
         end
+      end
+
+      def options
+        {
+          algorithm: algorithm
+        }
+      end
+
+      def hmac_secret
+        Groot.hmac_secret
+      end
+
+      def algorithm
+        Groot.algorithm
       end
     end
   end

@@ -1,9 +1,9 @@
 module ActionDispatch::Routing
   class Mapper
     def auth_for(resource)
-      mapping = Groot.mapping(resource)
-      constraint = lambda do |request| 
-        request.env['groot.mapping'] = mapping 
+      mapping = Groot.mapping_to(resource)
+      constraint = lambda do |request|
+        request.env['groot.mapping'] = mapping
         true
       end
       constraints(constraint) do
@@ -11,11 +11,11 @@ module ActionDispatch::Routing
       end
     end
 
-    private 
+    private
       def auth_routes(mapping) #:nodoc:
-        resource mapping.resource, only: [], controller: 'groot/auth' do 
-          post   :create,  path: mapping.path_names[:login]
-          delete :destroy, path: mapping.path_names[:logout]
+        resource mapping.resource, only: [], controller: 'groot/sessions' do
+          post   :create,  path: mapping.path_names[:sign_in]
+          delete :destroy, path: mapping.path_names[:sign_out]
         end
       end
   end

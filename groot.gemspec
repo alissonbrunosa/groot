@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.license     = "MIT"
 
   # spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
-  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
+  spec.files       = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
   end
   spec.add_dependency "rails", "~> 5.0", ">= 5.0.0"
