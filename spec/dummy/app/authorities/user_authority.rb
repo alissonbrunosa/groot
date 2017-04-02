@@ -1,0 +1,2 @@
+class UserAuthority < ApplicationAuthority
+end
